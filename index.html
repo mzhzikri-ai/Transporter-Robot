@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kontrol Robot Transporter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#CFCEC6;--panel:#E9E7DF;--ink:#1C1C1A;--soft:#5E5D55;--line:#1C1C1A;--yel:#F2B705;--red:#C8402B;--grn:#2F7D4F}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.4 'Barlow',system-ui,sans-serif;padding:20px}
+h1,h2{font-family:'Barlow Condensed','Arial Narrow',sans-serif;margin:0;letter-spacing:.02em}
+.wrap{max-width:1100px;margin:auto}
+header{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;border-bottom:4px solid var(--ink);padding-bottom:12px;margin-bottom:18px}
+h1{font-size:34px;font-weight:700}
+.stripe{height:10px;background:repeating-linear-gradient(-45deg,var(--yel) 0 14px,var(--ink) 14px 28px);margin-bottom:18px}
+.conn{display:flex;gap:10px;align-items:center}
+.pill{padding:6px 12px;border:2px solid var(--ink);background:var(--panel);font-weight:600}
+.pill i{display:inline-block;width:10px;height:10px;background:var(--red);margin-right:8px}
+.pill.on i{background:var(--grn)}
+button{font:inherit;cursor:pointer;color:var(--ink)}
+.btn{background:var(--yel);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:10px 18px;font:700 18px 'Barlow Condensed',sans-serif;letter-spacing:.04em}
+.btn:active,.btn.act{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+.btn.dark{background:var(--ink);color:#fff}
+.grid{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:16px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:2px solid var(--ink);padding:16px}
+h2{font-size:22px;font-weight:700;margin-bottom:12px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.sw{width:58px;height:30px;border:2px solid var(--ink);background:#bbb;position:relative;padding:0}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:22px;height:22px;background:var(--ink);transition:transform .15s}
+.sw.on{background:var(--grn)}.sw.on::after{transform:translateX(28px)}
+label.t{display:flex;justify-content:space-between;font-weight:600;margin-bottom:6px}
+input[type=range]{width:100%;accent-color:var(--ink);margin:0 0 16px}
+.dpad{display:grid;grid-template-columns:repeat(3,68px);grid-template-rows:repeat(3,68px);gap:8px;justify-content:center;margin-top:6px}
+.dpad .btn{padding:0;font-size:26px}
+.dpad .stop{background:var(--red);color:#fff;font-size:18px}
+.u{grid-area:1/2}.l{grid-area:2/1}.stop{grid-area:2/2}.r{grid-area:2/3}.d{grid-area:3/2}
+.vis{background:#fff;border:2px solid var(--ink);margin-bottom:14px}
+svg{display:block;width:100%;height:auto}
+.state{text-align:center;font:700 26px 'Barlow Condensed',sans-serif;margin-bottom:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.two .btn{font-size:24px;padding:16px 8px}
+.two .grab{background:var(--ink);color:var(--yel)}
+.log{background:#fff;border:2px solid var(--ink);height:300px;overflow:auto;padding:8px;font-size:13px}
+.log div{padding:4px 0;border-bottom:1px solid #ddd}.log span{color:var(--soft);margin-right:8px}
+.send{display:flex;gap:8px;margin-top:10px}
+.send input{flex:1;border:2px solid var(--ink);padding:8px;font:inherit;background:#fff}
+.link{background:none;border:0;text-decoration:underline;color:var(--soft);margin-top:8px;padding:0}
+.note{margin-top:18px;border-left:6px solid var(--yel);background:var(--panel);padding:10px 14px;color:var(--soft)}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>ROBOT TRANSPORTER</h1>
+  <div class="conn">
+    <div class="pill" id="pill"><i></i><span id="stText">Belum terhubung</span></div>
+    <button class="btn" id="connBtn">Hubungkan</button>
+  </div>
+</header>
+<div class="stripe"></div>
+
+<div class="grid">
+  <!-- GERAK -->
+  <section class="panel">
+    <h2>Gerak</h2>
+    <div class="row"><b>Daya motor</b><button class="sw" id="power" aria-label="Daya motor"></button></div>
+    <label class="t"><span>Kecepatan</span><span id="spVal">50%</span></label>
+    <input type="range" id="speed" min="0" max="100" value="50">
+    <div class="dpad">
+      <button class="btn u" data-d="up" aria-label="Maju">▲</button>
+      <button class="btn l" data-d="left" aria-label="Belok kiri">◀</button>
+      <button class="btn stop" data-d="stop">STOP</button>
+      <button class="btn r" data-d="right" aria-label="Belok kanan">▶</button>
+      <button class="btn d" data-d="down" aria-label="Mundur">▼</button>
+    </div>
+    <p style="color:var(--soft);font-size:13px;margin:14px 0 0">Tahan tombol untuk bergerak, lepas untuk berhenti. Keyboard: tombol panah.</p>
+  </section>
+
+  <!-- CAPIT -->
+  <section class="panel">
+    <h2>Capit</h2>
+    <div class="vis">
+      <svg viewBox="0 0 200 150" role="img" aria-label="Visual capit robot">
+        <rect x="55" y="8" width="90" height="22" fill="#1C1C1A"/>
+        <rect x="92" y="30" width="16" height="10" fill="#5E5D55"/>
+        <g id="jawL"><rect x="64" y="30" width="14" height="72" fill="#F2B705" stroke="#1C1C1A" stroke-width="2"/><rect x="64" y="92" width="36" height="12" fill="#F2B705" stroke="#1C1C1A" stroke-width="2"/></g>
+        <g id="jawR"><rect x="122" y="30" width="14" height="72" fill="#F2B705" stroke="#1C1C1A" stroke-width="2"/><rect x="100" y="92" width="36" height="12" fill="#F2B705" stroke="#1C1C1A" stroke-width="2"/></g>
+        <rect id="cargo" x="80" y="108" width="40" height="30" fill="#C8402B" stroke="#1C1C1A" stroke-width="2"/>
+        <line x1="0" y1="140" x2="200" y2="140" stroke="#1C1C1A" stroke-width="3"/>
+      </svg>
+    </div>
+    <div class="state" id="gState">Terbuka 100%</div>
+    <div class="two">
+      <button class="btn grab" id="gripBtn">CAPIT</button>
+      <button class="btn" id="releaseBtn">LEPAS</button>
+    </div>
+    <label class="t"><span>Bukaan capit</span><span id="gVal">100%</span></label>
+    <input type="range" id="gSlider" min="0" max="100" value="100">
+    <label class="t"><span>Tinggi lengan</span><span id="aVal">50%</span></label>
+    <input type="range" id="aSlider" min="0" max="100" value="50">
+    <p style="color:var(--soft);font-size:13px;margin:0">Keyboard: <b>Spasi</b> untuk capit/lepas bergantian.</p>
+  </section>
+
+  <!-- LOG -->
+  <section class="panel">
+    <h2>Catatan aktivitas</h2>
+    <div class="log" id="log"><div id="empty">Belum ada aktivitas. Hubungkan robot dulu.</div></div>
+    <button class="link" id="clear">Hapus catatan</button>
+    <div class="send">
+      <input id="cmd" placeholder="Ketik perintah manual">
+      <button class="btn dark" id="sendBtn">Kirim</button>
+    </div>
+  </section>
+</div>
+
+<div class="note">Buka di <b>Chrome</b> atau <b>Edge</b> (Web Bluetooth). Nyalakan Bluetooth, pastikan micro:bit hidup dan dekat, lalu klik <b>Hubungkan</b>. Halaman harus dibuka lewat <b>https</b> atau <b>localhost</b>.</div>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+  const TX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // notify (micro:bit -> web)
+  const RX = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // write  (web -> micro:bit)
+  let device = null, rxChar = null, connected = false, motorOn = false;
+  let queue = Promise.resolve();
+
+  function log(msg) {
+    const e = $('empty'); if (e) e.remove();
+    const d = document.createElement('div');
+    const t = document.createElement('span');
+    t.textContent = new Date().toTimeString().slice(0, 8);
+    d.append(t, document.createTextNode(msg));
+    $('log').appendChild(d);
+    $('log').scrollTop = $('log').scrollHeight;
+  }
+
+  function send(data) {
+    if (!rxChar || !device || !device.gatt.connected) return false;
+    const bytes = new TextEncoder().encode(data + '\n');
+    queue = queue.then(() => rxChar.writeValue(bytes)).catch(err => log('Gagal kirim: ' + err.message));
+    return true;
+  }
+
+  function setStatus(on) {
+    connected = on;
+    $('pill').classList.toggle('on', on);
+    $('stText').textContent = on ? 'Terhubung' : 'Belum terhubung';
+    $('connBtn').textContent = on ? 'Putuskan' : 'Hubungkan';
+  }
+
+  async function connect() {
+    try {
+      log('Mencari micro:bit...');
+      device = await navigator.bluetooth.requestDevice({
+        filters: [{ namePrefix: 'BBC micro:bit' }],
+        optionalServices: [SERVICE]
+      });
+      device.addEventListener('gattserverdisconnected', () => {
+        log('Bluetooth terputus.');
+        rxChar = null; device = null; motorOn = false;
+        $('power').classList.remove('on');
+        setStatus(false);
+      });
+      const server = await device.gatt.connect();
+      const svc = await server.getPrimaryService(SERVICE);
+      const tx = await svc.getCharacteristic(TX);
+      rxChar = await svc.getCharacteristic(RX);
+      await tx.startNotifications();
+      tx.addEventListener('characteristicvaluechanged', e =>
+        log('micro:bit: ' + new TextDecoder().decode(e.target.value).trim()));
+      setStatus(true);
+      log('Tersambung ke micro:bit.');
+    } catch (err) {
+      log('Gagal terhubung: ' + err.message);
+      setStatus(false);
+    }
+  }
+
+  $('connBtn').onclick = () => {
+    if (!connected) connect();
+    else if (device) device.gatt.disconnect();
+  };
+
+  // ---- Motor & kecepatan ----
+  $('power').onclick = () => {
+    if (!connected) return log('Hubungkan robot dulu.');
+    motorOn = !motorOn;
+    $('power').classList.toggle('on', motorOn);
+    log(motorOn ? 'Motor menyala.' : 'Motor mati.');
+    send(motorOn ? 'motor:1' : 'motor:0');
+  };
+  $('speed').oninput = e => $('spVal').textContent = e.target.value + '%';
+  $('speed').onchange = e => { log('Kecepatan ' + e.target.value + '%.'); send('speed:' + e.target.value); };
+
+  // ---- D-pad: tahan = UP/DOWN/LEFT/RIGHT, lepas = STOP (semua huruf besar) ----
+  const names = { up: 'Maju', down: 'Mundur', left: 'Belok kiri', right: 'Belok kanan', stop: 'Berhenti' };
+  document.querySelectorAll('[data-d]').forEach(b => {
+    const d = b.dataset.d; let held = false;
+    const press = () => { if (held) return; held = true; b.classList.add('act'); log(names[d] + '.'); send(d.toUpperCase()); };
+    const release = () => { if (!held) return; held = false; b.classList.remove('act'); if (d !== 'stop') send('STOP'); };
+    b.addEventListener('pointerdown', e => { b.setPointerCapture(e.pointerId); press(); });
+    b.addEventListener('pointerup', release);
+    b.addEventListener('pointercancel', release);
+    b.addEventListener('pointerleave', release);
+    b._press = press; b._release = release;
+  });
+
+  // ---- Capit ----
+  const jawL = $('jawL'), jawR = $('jawR'), cargo = $('cargo');
+  let grip = 100, holding = false, lastG = 0, lastA = 0;
+
+  function drawGrip(pct) {
+    grip = pct;
+    const a = pct * 0.3;
+    jawL.setAttribute('transform', 'rotate(' + a + ' 71 30)');
+    jawR.setAttribute('transform', 'rotate(' + (-a) + ' 129 30)');
+    $('gSlider').value = pct;
+    $('gVal').textContent = pct + '%';
+    $('gState').textContent = pct === 0 ? 'Mencapit' : pct === 100 ? 'Terbuka 100%' : 'Bukaan ' + pct + '%';
+    cargo.style.opacity = pct <= 30 ? 1 : 0.35;
+  }
+
+  function capit() {
+    if (!connected) log('Hubungkan robot dulu.');
+    holding = true; drawGrip(0);
+    log('Mencapit barang.'); send('grip:close');
+  }
+  function lepas() {
+    if (!connected) log('Hubungkan robot dulu.');
+    holding = false; drawGrip(100);
+    log('Melepas barang.'); send('grip:open');
+  }
+  $('gripBtn').onclick = capit;
+  $('releaseBtn').onclick = lepas;
+
+  $('gSlider').oninput = e => {
+    const v = +e.target.value; drawGrip(v);
+    const n = Date.now();
+    if (n - lastG > 120) { send('grip:' + v); lastG = n; }
+  };
+  $('gSlider').onchange = e => { send('grip:' + e.target.value); log('Bukaan capit ' + e.target.value + '%.'); };
+
+  $('aSlider').oninput = e => {
+    $('aVal').textContent = e.target.value + '%';
+    const n = Date.now();
+    if (n - lastA > 120) { send('arm:' + e.target.value); lastA = n; }
+  };
+  $('aSlider').onchange = e => { send('arm:' + e.target.value); log('Tinggi lengan ' + e.target.value + '%.'); };
+
+  drawGrip(100);
+
+  // ---- Log & perintah manual ----
+  $('clear').onclick = () => { $('log').innerHTML = '<div id="empty">Catatan kosong.</div>'; };
+  function manual() {
+    const v = $('cmd').value.trim(); if (!v) return;
+    log('Anda kirim: ' + v); send(v); $('cmd').value = '';
+  }
+  $('sendBtn').onclick = manual;
+  $('cmd').addEventListener('keydown', e => { if (e.key === 'Enter') manual(); });
+
+  // ---- Keyboard ----
+  const keyMap = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+  addEventListener('keydown', e => {
+    if (document.activeElement === $('cmd')) return;
+    if (e.key in keyMap) {
+      e.preventDefault();
+      document.querySelector('[data-d="' + keyMap[e.key] + '"]')._press();
+    } else if (e.code === 'Space' && !e.repeat) {
+      e.preventDefault();
+      holding ? lepas() : capit();
+    }
+  });
+  addEventListener('keyup', e => {
+    if (e.key in keyMap) document.querySelector('[data-d="' + keyMap[e.key] + '"]')._release();
+  });
+})();
+</script>
+</body>
+</html>
