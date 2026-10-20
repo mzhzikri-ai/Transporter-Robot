@@ -38,7 +38,7 @@ input[type=range]{width:100%;accent-color:var(--ink);margin:0 0 16px}
 .dpad .btn{padding:0;font-size:26px}
 .dpad .stop{background:var(--red);color:#fff;font-size:18px}
 .u{grid-area:1/2}.l{grid-area:2/1}.stop{grid-area:2/2}.r{grid-area:2/3}.d{grid-area:3/2}
-.vis{background:#fff;border:2px solid var(--ink);margin-bottom:14px}
+.vis{background:#fff;border:2px solid var(--ink);margin-bottom:14px;position:relative;overflow:hidden}
 svg{display:block;width:100%;height:auto}
 .state{text-align:center;font:700 26px 'Barlow Condensed',sans-serif;margin-bottom:12px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
@@ -50,6 +50,64 @@ svg{display:block;width:100%;height:auto}
 .send input{flex:1;border:2px solid var(--ink);padding:8px;font:inherit;background:#fff}
 .link{background:none;border:0;text-decoration:underline;color:var(--soft);margin-top:8px;padding:0}
 .note{margin-top:18px;border-left:6px solid var(--yel);background:var(--panel);padding:10px 14px;color:var(--soft)}
+.brand{display:flex;align-items:center;gap:14px}
+#bot{width:84px;height:auto;transition:transform .15s}
+#eyes{transform-box:fill-box;transform-origin:center;transition:transform .08s}
+#eyes.blink{transform:scaleY(.1)}
+.bubble{display:inline-block;margin-top:4px;padding:3px 10px;background:var(--yel);border:2px solid var(--ink);font-weight:600;font-size:13px}
+.botwrap{background:none;border:0;padding:0;cursor:pointer;line-height:0}
+.botwrap.hop{animation:hop .6s ease}
+@keyframes hop{0%{transform:none}25%{transform:translateY(4px) scale(1.1,.88)}55%{transform:translateY(-16px) scale(.94,1.08)}80%{transform:translateY(0) scale(1.06,.94)}100%{transform:none}}
+.gear{width:26px;height:26px;vertical-align:middle;margin-left:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+body.motor .gear{animation:spin 3s linear infinite}
+body.moving .gear{animation:spin .7s linear infinite}
+@keyframes belt{to{background-position:39.6px 0}}
+body.moving .stripe{animation:belt .5s linear infinite}
+body.moving.rev .stripe{animation-direction:reverse}
+.tower{display:flex;flex-direction:column;gap:3px;background:var(--ink);padding:3px;border:2px solid var(--ink)}
+.tower i{display:block;width:14px;height:8px;opacity:.2}
+.tower .r{background:#E5533A}.tower .y{background:var(--yel)}.tower .g{background:#3FB26F}
+body:not(.conn) .tower .r,body.conn .tower .g{opacity:1}
+body.moving .tower .y{opacity:1;animation:blink .5s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
+.vis.hit{animation:hit .35s ease}
+@keyframes hit{0%,100%{transform:none;box-shadow:none}30%{transform:translateY(6px);box-shadow:0 0 0 5px var(--yel)}60%{transform:translateY(-3px)}}
+.spark{position:fixed;width:7px;height:7px;pointer-events:none;z-index:9}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+.beacon{width:30px;height:30px;border-radius:50%;background:#6b6a62;border:2px solid var(--ink)}
+body.moving.rev .beacon{background:conic-gradient(#F2B705 0 25%,#8a6a00 0 50%,#F2B705 0 75%,#8a6a00 0);animation:spin .6s linear infinite}
+#eyes.sleep{transform:scaleY(.1)}
+.botwrap.nod{animation:nod .4s}
+@keyframes nod{40%{transform:translateY(5px) rotate(4deg)}}
+.botwrap.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+body.alarm .wrap{animation:shake .4s 2}
+body.alarm::after{content:'';position:fixed;inset:0;background:rgba(200,64,43,.35);pointer-events:none;animation:flash .7s ease-out forwards}
+@keyframes flash{to{opacity:0}}
+body{background-image:linear-gradient(rgba(28,28,26,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(28,28,26,.05) 1px,transparent 1px);background-size:32px 32px}
+.bubble{min-height:1.7em}
+#bot{overflow:visible}
+#arm{transform-origin:92px 50px;transform-box:view-box;transform:rotate(80deg)}
+#arm.wave{animation:wave 1.4s ease}
+#arm.salute{animation:salute 1.2s ease}
+@keyframes wave{0%,100%{transform:rotate(80deg)}20%,50%,80%{transform:rotate(-70deg)}35%,65%{transform:rotate(-40deg)}}
+@keyframes salute{0%,100%{transform:rotate(80deg)}25%,75%{transform:rotate(-115deg)}}
+.puff{position:absolute;width:26px;height:26px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,#bdbbb2 0,rgba(189,187,178,0) 70%)}
+.jaws i{position:fixed;top:0;bottom:0;width:0;pointer-events:none;z-index:7;background:repeating-linear-gradient(-45deg,var(--yel) 0 14px,var(--ink) 14px 28px)}
+.jaws i:first-child{left:0}.jaws i:last-child{right:0}
+body.clamp .jaws i{animation:jaw .7s ease-in-out}
+@keyframes jaw{0%,100%{width:0}35%{width:16vw}55%{width:12vw}}
+body.holding::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:6;box-shadow:inset 0 0 0 6px var(--yel),inset 0 0 36px 8px rgba(242,183,5,.4);animation:holdPulse 1.6s ease-in-out infinite}
+@keyframes holdPulse{50%{box-shadow:inset 0 0 0 6px var(--yel),inset 0 0 60px 14px rgba(242,183,5,.55)}}
+.btn.nudge{animation:nudge .6s 3}
+@keyframes nudge{50%{transform:scale(1.12);box-shadow:3px 3px 0 var(--ink),0 0 0 6px var(--red)}}
+.dpad small{display:block;font-size:11px;font-weight:600;letter-spacing:.08em;margin-top:-2px}
+.nosig{position:fixed;top:14px;left:50%;transform:translate(-50%,-160%);z-index:9;pointer-events:none;background:var(--ink);color:var(--yel);border:3px solid var(--yel);box-shadow:0 0 0 3px var(--ink);padding:8px 22px;font:700 24px 'Barlow Condensed',sans-serif;letter-spacing:.08em;white-space:nowrap}
+.nosig.show{animation:nosig 1.8s ease,flick .2s steps(2) 8}
+@keyframes nosig{0%,100%{transform:translate(-50%,-160%)}12%,82%{transform:translate(-50%,0)}}
+@keyframes flick{50%{opacity:.45}}
+body:not(.conn) .tower .r{animation:blink 1s steps(2) infinite}
 :focus-visible{outline:3px solid var(--red);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -57,9 +115,33 @@ svg{display:block;width:100%;height:auto}
 <body>
 <div class="wrap">
 <header>
-  <h1>ROBOT TRANSPORTER</h1>
+  <div class="brand">
+    <button class="botwrap" id="botBtn" aria-label="Klik robot"><svg id="bot" viewBox="0 0 100 90" aria-hidden="true">
+      <line x1="50" y1="14" x2="50" y2="5" stroke="#1C1C1A" stroke-width="3"/>
+      <circle cx="50" cy="5" r="4" fill="#C8402B" stroke="#1C1C1A" stroke-width="2"/>
+      <rect x="3" y="34" width="9" height="20" fill="#5E5D55" stroke="#1C1C1A" stroke-width="2"/>
+      <rect x="88" y="34" width="9" height="20" fill="#5E5D55" stroke="#1C1C1A" stroke-width="2"/>
+      <rect x="10" y="14" width="80" height="66" rx="14" fill="#F2B705" stroke="#1C1C1A" stroke-width="3"/>
+      <rect x="18" y="24" width="64" height="36" rx="8" fill="#1C1C1A"/>
+      <g id="eyes">
+        <circle id="eL" cx="36" cy="42" r="11" fill="#fff"/>
+        <circle id="eR" cx="64" cy="42" r="11" fill="#fff"/>
+        <circle id="pL" cx="36" cy="42" r="5" fill="#1C1C1A"/>
+        <circle id="pR" cx="64" cy="42" r="5" fill="#1C1C1A"/>
+      </g>
+      <g id="arm"><rect x="92" y="46" width="22" height="8" rx="4" fill="#5E5D55" stroke="#1C1C1A" stroke-width="2"/><circle cx="114" cy="50" r="5" fill="#F2B705" stroke="#1C1C1A" stroke-width="2"/></g>
+      <path id="mouth" d="M40 68 Q50 70 60 68" fill="none" stroke="#1C1C1A" stroke-width="3" stroke-linecap="round"/>
+    </svg></button>
+    <div>
+      <h1>ROBOT TRANSPORTER</h1>
+      <div class="bubble" id="bubble">Halo! Hubungkan aku dulu ya.</div>
+    </div>
+  </div>
   <div class="conn">
+    <div class="tower" title="Merah: putus, Kuning: bergerak, Hijau: siap"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+    <div class="beacon" title="Lampu peringatan: menyala saat mundur"></div>
     <div class="pill" id="pill"><i></i><span id="stText">Belum terhubung</span></div>
+    <button class="btn dark" id="reBtn" hidden>Sambung ulang</button>
     <button class="btn" id="connBtn">Hubungkan</button>
   </div>
 </header>
@@ -68,18 +150,18 @@ svg{display:block;width:100%;height:auto}
 <div class="grid">
   <!-- GERAK -->
   <section class="panel">
-    <h2>Gerak</h2>
+    <h2>Gerak <svg class="gear" viewBox="-16 -16 32 32" aria-hidden="true"><circle r="11" fill="none" stroke="#1C1C1A" stroke-width="6" stroke-dasharray="4.32"/><circle r="8" fill="#F2B705" stroke="#1C1C1A" stroke-width="2"/><circle r="3" fill="#1C1C1A"/></svg></h2>
     <div class="row"><b>Daya motor</b><button class="sw" id="power" aria-label="Daya motor"></button></div>
     <label class="t"><span>Kecepatan</span><span id="spVal">50%</span></label>
     <input type="range" id="speed" min="0" max="100" value="50">
     <div class="dpad">
       <button class="btn u" data-d="up" aria-label="Maju">▲</button>
       <button class="btn l" data-d="left" aria-label="Belok kiri">◀</button>
-      <button class="btn stop" data-d="stop">STOP</button>
+      <button class="btn stop" data-d="stop">STOP<small>tombol F</small></button>
       <button class="btn r" data-d="right" aria-label="Belok kanan">▶</button>
       <button class="btn d" data-d="down" aria-label="Mundur">▼</button>
     </div>
-    <p style="color:var(--soft);font-size:13px;margin:14px 0 0">Tahan tombol untuk bergerak, lepas untuk berhenti. Keyboard: tombol panah.</p>
+    <p style="color:var(--soft);font-size:13px;margin:14px 0 0">Tahan tombol untuk bergerak, lepas untuk berhenti. Keyboard: panah atau WASD untuk gerak, F untuk STOP.</p>
   </section>
 
   <!-- CAPIT -->
@@ -102,8 +184,6 @@ svg{display:block;width:100%;height:auto}
     </div>
     <label class="t"><span>Bukaan capit</span><span id="gVal">100%</span></label>
     <input type="range" id="gSlider" min="0" max="100" value="100">
-    <label class="t"><span>Tinggi lengan</span><span id="aVal">50%</span></label>
-    <input type="range" id="aSlider" min="0" max="100" value="50">
     <p style="color:var(--soft);font-size:13px;margin:0">Keyboard: <b>Spasi</b> untuk capit/lepas bergantian.</p>
   </section>
 
@@ -121,6 +201,9 @@ svg{display:block;width:100%;height:auto}
 
 <div class="note">Buka di <b>Chrome</b> atau <b>Edge</b> (Web Bluetooth). Nyalakan Bluetooth, pastikan micro:bit hidup dan dekat, lalu klik <b>Hubungkan</b>. Halaman harus dibuka lewat <b>https</b> atau <b>localhost</b>.</div>
 </div>
+
+<div class="nosig" id="nosig" aria-hidden="true">&#9888; BELUM TERSAMBUNG</div>
+<div class="jaws" aria-hidden="true"><i></i><i></i></div>
 
 <script>
 (function () {
@@ -148,26 +231,39 @@ svg{display:block;width:100%;height:auto}
     return true;
   }
 
+  let known = null;
   function setStatus(on) {
+    const was = connected;
     connected = on;
+    $('reBtn').hidden = on || !known;
     $('pill').classList.toggle('on', on);
     $('stText').textContent = on ? 'Terhubung' : 'Belum terhubung';
     $('connBtn').textContent = on ? 'Putuskan' : 'Hubungkan';
+    say(on ? 'Tersambung! Siap kerja.' : 'Koneksi belum ada...', on ? 'happy' : 'sad');
+    if (on) armAnim('wave'); else if (was) armAnim('salute');
+    document.body.classList.toggle('conn', on);
+    if (!on) document.body.classList.remove('moving', 'motor');
   }
 
-  async function connect() {
+  async function connect(again) {
     try {
-      log('Mencari micro:bit...');
-      device = await navigator.bluetooth.requestDevice({
-        filters: [{ namePrefix: 'BBC micro:bit' }],
-        optionalServices: [SERVICE]
-      });
-      device.addEventListener('gattserverdisconnected', () => {
-        log('Bluetooth terputus.');
-        rxChar = null; device = null; motorOn = false;
-        $('power').classList.remove('on');
-        setStatus(false);
-      });
+      if (again) { device = again; log('Menyambung ulang ke ' + again.name + '...'); }
+      else {
+        log('Mencari micro:bit...');
+        device = await navigator.bluetooth.requestDevice({
+          filters: [{ namePrefix: 'BBC micro:bit' }],
+          optionalServices: [SERVICE]
+        });
+      }
+      if (!device._wired) {
+        device._wired = true;
+        device.addEventListener('gattserverdisconnected', () => {
+          log('Bluetooth terputus.');
+          rxChar = null; device = null; motorOn = false;
+          $('power').classList.remove('on');
+          setStatus(false);
+        });
+      }
       const server = await device.gatt.connect();
       const svc = await server.getPrimaryService(SERVICE);
       const tx = await svc.getCharacteristic(TX);
@@ -175,14 +271,33 @@ svg{display:block;width:100%;height:auto}
       await tx.startNotifications();
       tx.addEventListener('characteristicvaluechanged', e =>
         log('micro:bit: ' + new TextDecoder().decode(e.target.value).trim()));
+      known = device;
       setStatus(true);
       log('Tersambung ke micro:bit.');
     } catch (err) {
-      log('Gagal terhubung: ' + err.message);
+      const hints = {
+        NotFoundError: 'Tidak ada perangkat dipilih atau tidak ada "BBC micro:bit" yang terdeteksi. Pastikan micro:bit menyala, program UART Bluetooth sudah jalan, dan tidak sedang tersambung ke perangkat lain.',
+        SecurityError: 'Browser memblokir Bluetooth di halaman ini. Download file lalu buka langsung di Chrome/Edge (klik dua kali), jangan dari pratinjau.',
+        NetworkError: 'Gagal menyambung ke micro:bit. Coba hapus pairing lama di pengaturan Bluetooth, lalu ulangi.'
+      };
+      log('Gagal terhubung (' + err.name + '): ' + (hints[err.name] || err.message));
       setStatus(false);
     }
   }
 
+  if (!navigator.bluetooth) {
+    log('Browser ini tidak mendukung Web Bluetooth. Buka file ini langsung di Chrome atau Edge (https atau localhost), bukan dari pratinjau.');
+  }
+
+  $('reBtn').onclick = () => { if (!connected && known) connect(known); };
+  (async () => {
+    try {
+      if (!navigator.bluetooth || !navigator.bluetooth.getDevices) return;
+      const list = await navigator.bluetooth.getDevices();
+      known = list.find(d => d.name && d.name.startsWith('BBC micro:bit')) || null;
+      if (known && !connected) { $('reBtn').hidden = false; log('micro:bit terakhir ditemukan: ' + known.name + '. Klik "Sambung ulang".'); }
+    } catch (e) {}
+  })();
   $('connBtn').onclick = () => {
     if (!connected) connect();
     else if (device) device.gatt.disconnect();
@@ -190,9 +305,10 @@ svg{display:block;width:100%;height:auto}
 
   // ---- Motor & kecepatan ----
   $('power').onclick = () => {
-    if (!connected) return log('Hubungkan robot dulu.');
+    if (!connected) return warn();
     motorOn = !motorOn;
     $('power').classList.toggle('on', motorOn);
+    document.body.classList.toggle('motor', motorOn);
     log(motorOn ? 'Motor menyala.' : 'Motor mati.');
     send(motorOn ? 'motor:1' : 'motor:0');
   };
@@ -203,8 +319,8 @@ svg{display:block;width:100%;height:auto}
   const names = { up: 'Maju', down: 'Mundur', left: 'Belok kiri', right: 'Belok kanan', stop: 'Berhenti' };
   document.querySelectorAll('[data-d]').forEach(b => {
     const d = b.dataset.d; let held = false;
-    const press = () => { if (held) return; held = true; b.classList.add('act'); log(names[d] + '.'); send(d.toUpperCase()); };
-    const release = () => { if (!held) return; held = false; b.classList.remove('act'); if (d !== 'stop') send('STOP'); };
+    const press = () => { if (!connected) { warn(); if (d !== 'stop') return; } if (held) return; held = true; b.classList.add('act'); setMove(d, true); log(names[d] + '.'); say(d === 'stop' ? 'Berhenti!' : names[d] + '!', d === 'stop' ? 'surprise' : 'busy'); send(d.toUpperCase()); };
+    const release = () => { if (!held) return; held = false; b.classList.remove('act'); setMove(d, false); if (d !== 'stop') send('STOP'); };
     b.addEventListener('pointerdown', e => { b.setPointerCapture(e.pointerId); press(); });
     b.addEventListener('pointerup', release);
     b.addEventListener('pointercancel', release);
@@ -214,7 +330,7 @@ svg{display:block;width:100%;height:auto}
 
   // ---- Capit ----
   const jawL = $('jawL'), jawR = $('jawR'), cargo = $('cargo');
-  let grip = 100, holding = false, lastG = 0, lastA = 0;
+  let grip = 100, holding = false, lastG = 0, cargoHeld = false;
 
   function drawGrip(pct) {
     grip = pct;
@@ -224,18 +340,19 @@ svg{display:block;width:100%;height:auto}
     $('gSlider').value = pct;
     $('gVal').textContent = pct + '%';
     $('gState').textContent = pct === 0 ? 'Mencapit' : pct === 100 ? 'Terbuka 100%' : 'Bukaan ' + pct + '%';
-    cargo.style.opacity = pct <= 30 ? 1 : 0.35;
+    if ((pct <= 30) !== cargoHeld) { cargoHeld = pct <= 30; moveCargo(cargoHeld); }
+    document.body.classList.toggle('holding', pct <= 30);
   }
 
   function capit() {
-    if (!connected) log('Hubungkan robot dulu.');
-    holding = true; drawGrip(0);
-    log('Mencapit barang.'); send('grip:close');
+    if (!connected) return warn();
+    holding = true; drawGrip(0); hitFx(); clampFx(); puff();
+    log('Mencapit barang.'); say('Dapat barangnya!', 'happy'); send('grip:close');
   }
   function lepas() {
-    if (!connected) log('Hubungkan robot dulu.');
-    holding = false; drawGrip(100);
-    log('Melepas barang.'); send('grip:open');
+    if (!connected) return warn();
+    holding = false; drawGrip(100); hitFx();
+    log('Melepas barang.'); say('Barang dilepas.', 'idle'); send('grip:open');
   }
   $('gripBtn').onclick = capit;
   $('releaseBtn').onclick = lepas;
@@ -246,13 +363,6 @@ svg{display:block;width:100%;height:auto}
     if (n - lastG > 120) { send('grip:' + v); lastG = n; }
   };
   $('gSlider').onchange = e => { send('grip:' + e.target.value); log('Bukaan capit ' + e.target.value + '%.'); };
-
-  $('aSlider').oninput = e => {
-    $('aVal').textContent = e.target.value + '%';
-    const n = Date.now();
-    if (n - lastA > 120) { send('arm:' + e.target.value); lastA = n; }
-  };
-  $('aSlider').onchange = e => { send('arm:' + e.target.value); log('Tinggi lengan ' + e.target.value + '%.'); };
 
   drawGrip(100);
 
@@ -266,20 +376,216 @@ svg{display:block;width:100%;height:auto}
   $('cmd').addEventListener('keydown', e => { if (e.key === 'Enter') manual(); });
 
   // ---- Keyboard ----
-  const keyMap = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+  const keyMap = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right', f: 'stop' };
+  const kd = e => keyMap[e.key] || keyMap[e.key.toLowerCase()];
   addEventListener('keydown', e => {
     if (document.activeElement === $('cmd')) return;
-    if (e.key in keyMap) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (kd(e)) {
       e.preventDefault();
-      document.querySelector('[data-d="' + keyMap[e.key] + '"]')._press();
+      document.querySelector('[data-d="' + kd(e) + '"]')._press();
     } else if (e.code === 'Space' && !e.repeat) {
       e.preventDefault();
       holding ? lepas() : capit();
     }
   });
   addEventListener('keyup', e => {
-    if (e.key in keyMap) document.querySelector('[data-d="' + keyMap[e.key] + '"]')._release();
+    if (kd(e)) document.querySelector('[data-d="' + kd(e) + '"]')._release();
   });
+
+  // ---- Maskot: mata mengikuti kursor, kedip, ekspresi ----
+  const bot = $('bot'), pL = $('pL'), pR = $('pR'), eyes = $('eyes'), mouth = $('mouth');
+  const mouths = {
+    idle: 'M40 68 Q50 70 60 68', happy: 'M38 65 Q50 77 62 65', busy: 'M42 68 L58 68',
+    sad: 'M38 72 Q50 63 62 72', surprise: 'M45 65 Q50 77 55 65 Q50 61 45 65',
+    angry: 'M38 70 L44 66 L50 70 L56 66 L62 70', sleep: 'M46 68 Q50 73 54 68'
+  };
+  let moodT, typeT;
+  function typeText(t) {
+    clearInterval(typeT);
+    const b = $('bubble');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { b.textContent = t; return; }
+    let i = 1; b.textContent = t.slice(0, 1);
+    typeT = setInterval(() => { b.textContent = t.slice(0, ++i); if (i >= t.length) clearInterval(typeT); }, 28);
+  }
+  function armAnim(c) {
+    const a = $('arm'); a.classList.remove('wave', 'salute'); void a.getBoundingClientRect(); a.classList.add(c);
+  }
+  function say(text, mood) {
+    typeText(text);
+    mouth.setAttribute('d', mouths[mood] || mouths.idle);
+    clearTimeout(moodT);
+    moodT = setTimeout(() => mouth.setAttribute('d', mouths.idle), 2500);
+  }
+  addEventListener('pointermove', e => {
+    [['eL', pL], ['eR', pR]].forEach(([id, p]) => {
+      const r = $(id).getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      const k = Math.min(1, Math.hypot(dx, dy) / 160) * 4.5, a = Math.atan2(dy, dx);
+      p.setAttribute('transform', 'translate(' + (Math.cos(a) * k).toFixed(2) + ' ' + (Math.sin(a) * k).toFixed(2) + ')');
+    });
+    const br = bot.getBoundingClientRect();
+    const near = Math.hypot(e.clientX - (br.left + br.width / 2), e.clientY - (br.top + br.height / 2)) < 90;
+    $('eL').setAttribute('r', near ? 13 : 11); $('eR').setAttribute('r', near ? 13 : 11);
+    pL.setAttribute('r', near ? 6 : 5); pR.setAttribute('r', near ? 6 : 5);
+    const tilt = Math.max(-10, Math.min(10, (e.clientX - (br.left + br.width / 2)) / 60));
+    bot.style.transform = 'rotate(' + tilt + 'deg)';
+  });
+  setInterval(() => { eyes.classList.add('blink'); setTimeout(() => eyes.classList.remove('blink'), 140); }, 3600);
+
+  // ---- Efek pabrik ----
+  function clampFx() {
+    const c = document.body.classList;
+    c.remove('clamp'); void document.body.offsetWidth; c.add('clamp');
+    setTimeout(() => c.remove('clamp'), 800);
+  }
+  function puff() {
+    const v = document.querySelector('.vis');
+    [[42, 66], [58, 66], [50, 70], [36, 60], [64, 60]].forEach(([x, y], i) => {
+      const p = document.createElement('i');
+      p.className = 'puff'; p.style.left = x + '%'; p.style.top = y + '%';
+      v.appendChild(p);
+      p.animate([
+        { transform: 'translate(-50%,-50%) scale(.4)', opacity: .9 },
+        { transform: 'translate(-50%,-50%) translate(' + (x - 50) * 1.4 + 'px,-40px) scale(1.8)', opacity: 0 }
+      ], { duration: 700 + i * 80, delay: i * 40, easing: 'ease-out', fill: 'backwards' }).onfinish = () => p.remove();
+    });
+  }
+  function hitFx() {
+    const v = document.querySelector('.vis');
+    v.classList.remove('hit'); void v.offsetWidth; v.classList.add('hit'); anim($('botBtn'), 'nod');
+    const r = v.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height * 0.7, 10);
+  }
+  function burst(x, y, n) {
+    for (let i = 0; i < n; i++) {
+      const s = document.createElement('i');
+      s.className = 'spark';
+      s.style.left = x + 'px'; s.style.top = y + 'px';
+      s.style.background = i % 2 ? '#F2B705' : '#1C1C1A';
+      document.body.appendChild(s);
+      const a = Math.random() * 6.28, d = 30 + Math.random() * 40;
+      s.animate([{ transform: 'translate(0,0) scale(1)', opacity: 1 },
+        { transform: 'translate(' + Math.cos(a) * d + 'px,' + Math.sin(a) * d + 'px) scale(.2)', opacity: 0 }],
+        { duration: 450, easing: 'ease-out' }).onfinish = () => s.remove();
+    }
+  }
+  document.addEventListener('pointerdown', e => {
+    if (e.target.closest('.btn, .sw')) burst(e.clientX, e.clientY, 6);
+  });
+  const lines = ['Siap kerja, Bos!', 'Shift pagi dimulai!', 'Barang aman di tanganku.', 'Conveyor lancar jaya!', 'Jangan lupa istirahat ya.'];
+  let li = 0;
+  $('botBtn').onclick = () => {
+    const b = $('botBtn');
+    b.classList.remove('hop'); void b.offsetWidth; b.classList.add('hop');
+    const r = b.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + 8, 14);
+    acc.innerHTML = accs[ai++ % accs.length];
+    say(lines[li % lines.length], 'happy'); li++;
+  };
+
+  // ---- Gerak, ekspresi, aksesori ----
+  const stops = [];
+  function anim(el, c) { el.classList.remove('hop', 'nod', 'shake'); void el.offsetWidth; el.classList.add(c); }
+  function setMove(d, on) {
+    const c = document.body.classList;
+    if (d === 'stop') {
+      c.remove('moving');
+      if (on) {
+        c.remove('alarm'); void document.body.offsetWidth; c.add('alarm');
+        setTimeout(() => c.remove('alarm'), 800);
+        const n = Date.now(); stops.push(n);
+        while (stops.length && n - stops[0] > 3000) stops.shift();
+        if (stops.length >= 4) {
+          stops.length = 0;
+          setTimeout(() => { say('Sabar dong, jangan STOP terus!', 'angry'); anim($('botBtn'), 'shake'); }, 0);
+        }
+      }
+      return;
+    }
+    c.toggle('moving', on);
+    if (on) c.toggle('rev', d === 'down');
+  }
+  bot.insertAdjacentHTML('beforeend', '<g id="acc"></g>');
+  const acc = $('acc'); let ai = 1;
+  const S = ' stroke="#1C1C1A" stroke-width="3"';
+  const accs = [
+    '',
+    '<path d="M16 18 Q50 -8 84 18 Z" fill="#fff"' + S + '/><rect x="11" y="16" width="78" height="6" rx="3" fill="#fff"' + S + '/>',
+    '<rect x="22" y="29" width="28" height="26" rx="9" fill="rgba(47,125,79,.55)"' + S + '/><rect x="50" y="29" width="28" height="26" rx="9" fill="rgba(47,125,79,.55)"' + S + '/>',
+    '<path d="M16 20 Q50 -4 84 20 Z" fill="#C8402B"' + S + '/><rect x="52" y="17" width="44" height="6" rx="3" fill="#C8402B"' + S + '/>'
+  ];
+
+  // ---- Tidur kalau lama didiamkan ----
+  let sleeping = false, last = Date.now();
+  const wake = () => {
+    last = Date.now();
+    if (sleeping) { sleeping = false; eyes.classList.remove('sleep'); say('Hah? Aku ketiduran...', 'surprise'); }
+  };
+  addEventListener('pointerdown', wake); addEventListener('keydown', wake);
+  setInterval(() => {
+    if (!sleeping && Date.now() - last > 30000) { sleeping = true; eyes.classList.add('sleep'); say('Zzz...', 'sleep'); }
+  }, 1000);
+
+  // ---- Gamepad: stik kiri = arah, A = capit, B = lepas, X = stop, D-pad = arah ----
+  let prev = [];
+  const pad = { 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
+  let stick = null;
+  function poll() {
+    const g = [...navigator.getGamepads()].find(Boolean);
+    if (!g) return;
+    const now = g.buttons.map(b => b.pressed);
+    now.forEach((p, i) => {
+      if (p === !!prev[i]) return;
+      wake();
+      if (pad[i]) { const b = document.querySelector('[data-d="' + pad[i] + '"]'); p ? b._press() : b._release(); }
+      else if (p && i === 0) capit();
+      else if (p && i === 1) lepas();
+      else if (p && i === 2) { setMove('stop', true); log('Berhenti!'); send('STOP'); }
+    });
+    prev = now;
+    const ax = g.axes[0] || 0, ay = g.axes[1] || 0;
+    const sd = Math.hypot(ax, ay) < 0.5 ? null : Math.abs(ax) > Math.abs(ay) ? (ax > 0 ? 'right' : 'left') : (ay > 0 ? 'down' : 'up');
+    if (sd !== stick) {
+      if (stick) document.querySelector('[data-d="' + stick + '"]')._release();
+      if (sd) { wake(); document.querySelector('[data-d="' + sd + '"]')._press(); }
+      stick = sd;
+    }
+    requestAnimationFrame(poll);
+  }
+  addEventListener('gamepadconnected', e => { log('Gamepad terhubung: ' + e.gamepad.id); say('Wah, ada stik!', 'happy'); requestAnimationFrame(poll); });
+  addEventListener('gamepaddisconnected', () => log('Gamepad terputus.'));
+
+
+  // ---- Peringatan belum tersambung ----
+  let lastWarn = 0;
+  function warn() {
+    const n = Date.now(); if (n - lastWarn < 1500) return; lastWarn = n;
+    log('Belum tersambung. Klik Hubungkan dulu.');
+    say('Eh, belum tersambung nih!', 'surprise'); anim($('botBtn'), 'shake');
+    const b = $('connBtn'); b.classList.remove('nudge'); void b.offsetWidth; b.classList.add('nudge');
+    const ns = $('nosig'); ns.classList.remove('show'); void ns.offsetWidth; ns.classList.add('show');
+  }
+
+  // ---- Kotak barang naik saat dicapit, jatuh memantul saat dilepas ----
+  function moveCargo(held) {
+    cargo.getAnimations().forEach(a => a.cancel());
+    cargo.style.transform = held ? 'translateY(-48px)' : 'translateY(0)';
+    cargo.animate(held
+      ? [{ transform: 'translateY(0)' }, { transform: 'translateY(-54px)' }, { transform: 'translateY(-48px)' }]
+      : [{ transform: 'translateY(-48px)', offset: 0 }, { transform: 'translateY(0)', offset: .5 }, { transform: 'translateY(-10px)', offset: .7 },
+         { transform: 'translateY(0)', offset: .85 }, { transform: 'translateY(-3px)', offset: .93 }, { transform: 'translateY(0)', offset: 1 }],
+      { duration: held ? 350 : 700, easing: 'ease-out' });
+  }
+
+  // ---- Jendela tidak aktif: robot berhenti ----
+  function releaseAll() {
+    const mv = document.body.classList.contains('moving');
+    document.querySelectorAll('[data-d]').forEach(b => b._release());
+    send('STOP');
+    if (mv) { log('Jendela tidak aktif. STOP dikirim.'); say('Aku berhenti dulu ya.', 'surprise'); }
+  }
+  addEventListener('blur', releaseAll);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
 })();
 </script>
 </body>
