@@ -108,6 +108,8 @@ body.holding::before{content:'';position:fixed;inset:0;pointer-events:none;z-ind
 @keyframes nosig{0%,100%{transform:translate(-50%,-160%)}12%,82%{transform:translate(-50%,0)}}
 @keyframes flick{50%{opacity:.45}}
 body:not(.conn) .tower .r{animation:blink 1s steps(2) infinite}
+body:not(.conn) :is(.dpad .btn,.two .btn,.sw,.send .btn,input[type=range]){opacity:.55}
+body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-shadow:3px 3px 0 var(--ink)}
 :focus-visible{outline:3px solid var(--red);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -312,14 +314,19 @@ body:not(.conn) .tower .r{animation:blink 1s steps(2) infinite}
     log(motorOn ? 'Motor menyala.' : 'Motor mati.');
     send(motorOn ? 'motor:1' : 'motor:0');
   };
-  $('speed').oninput = e => $('spVal').textContent = e.target.value + '%';
-  $('speed').onchange = e => { log('Kecepatan ' + e.target.value + '%.'); send('speed:' + e.target.value); };
+  let speedVal = 50;
+  $('speed').oninput = e => {
+    if (!connected) { e.target.value = speedVal; return warn(); }
+    speedVal = +e.target.value; $('spVal').textContent = e.target.value + '%';
+  };
+  $('speed').onchange = e => {
+    if (!connected) return; log('Kecepatan ' + e.target.value + '%.'); send('speed:' + e.target.value); };
 
   // ---- D-pad: tahan = UP/DOWN/LEFT/RIGHT, lepas = STOP (semua huruf besar) ----
   const names = { up: 'Maju', down: 'Mundur', left: 'Belok kiri', right: 'Belok kanan', stop: 'Berhenti' };
   document.querySelectorAll('[data-d]').forEach(b => {
     const d = b.dataset.d; let held = false;
-    const press = () => { if (!connected) { warn(); if (d !== 'stop') return; } if (held) return; held = true; b.classList.add('act'); setMove(d, true); log(names[d] + '.'); say(d === 'stop' ? 'Berhenti!' : names[d] + '!', d === 'stop' ? 'surprise' : 'busy'); send(d.toUpperCase()); };
+    const press = () => { if (!connected) return warn(); if (held) return; held = true; b.classList.add('act'); setMove(d, true); log(names[d] + '.'); say(d === 'stop' ? 'Berhenti!' : names[d] + '!', d === 'stop' ? 'surprise' : 'busy'); send(d.toUpperCase()); };
     const release = () => { if (!held) return; held = false; b.classList.remove('act'); setMove(d, false); if (d !== 'stop') send('STOP'); };
     b.addEventListener('pointerdown', e => { b.setPointerCapture(e.pointerId); press(); });
     b.addEventListener('pointerup', release);
@@ -358,11 +365,12 @@ body:not(.conn) .tower .r{animation:blink 1s steps(2) infinite}
   $('releaseBtn').onclick = lepas;
 
   $('gSlider').oninput = e => {
+    if (!connected) { e.target.value = grip; return warn(); }
     const v = +e.target.value; drawGrip(v);
     const n = Date.now();
     if (n - lastG > 120) { send('grip:' + v); lastG = n; }
   };
-  $('gSlider').onchange = e => { send('grip:' + e.target.value); log('Bukaan capit ' + e.target.value + '%.'); };
+  $('gSlider').onchange = e => { if (!connected) return; send('grip:' + e.target.value); log('Bukaan capit ' + e.target.value + '%.'); };
 
   drawGrip(100);
 
@@ -370,6 +378,7 @@ body:not(.conn) .tower .r{animation:blink 1s steps(2) infinite}
   $('clear').onclick = () => { $('log').innerHTML = '<div id="empty">Catatan kosong.</div>'; };
   function manual() {
     const v = $('cmd').value.trim(); if (!v) return;
+    if (!connected) return warn();
     log('Anda kirim: ' + v); send(v); $('cmd').value = '';
   }
   $('sendBtn').onclick = manual;
@@ -470,7 +479,8 @@ body:not(.conn) .tower .r{animation:blink 1s steps(2) infinite}
     }
   }
   document.addEventListener('pointerdown', e => {
-    if (e.target.closest('.btn, .sw')) burst(e.clientX, e.clientY, 6);
+    const bt = e.target.closest('.btn, .sw');
+    if (bt && (connected || bt.closest('header'))) burst(e.clientX, e.clientY, 6);
   });
   const lines = ['Siap kerja, Bos!', 'Shift pagi dimulai!', 'Barang aman di tanganku.', 'Conveyor lancar jaya!', 'Jangan lupa istirahat ya.'];
   let li = 0;
