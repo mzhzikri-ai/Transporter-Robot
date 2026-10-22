@@ -110,6 +110,9 @@ body.holding::before{content:'';position:fixed;inset:0;pointer-events:none;z-ind
 body:not(.conn) .tower .r{animation:blink 1s steps(2) infinite}
 body:not(.conn) :is(.dpad .btn,.two .btn,.sw,.send .btn,input[type=range]){opacity:.55}
 body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-shadow:3px 3px 0 var(--ink)}
+#head{transform-origin:50px 48px;transform-box:view-box}
+#armL{transform-origin:8px 50px;transform-box:view-box;transform:rotate(-80deg)}
+#qm{opacity:0}
 :focus-visible{outline:3px solid var(--red);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -119,6 +122,7 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
 <header>
   <div class="brand">
     <button class="botwrap" id="botBtn" aria-label="Klik robot"><svg id="bot" viewBox="0 0 100 90" aria-hidden="true">
+      <g id="head">
       <line x1="50" y1="14" x2="50" y2="5" stroke="#1C1C1A" stroke-width="3"/>
       <circle cx="50" cy="5" r="4" fill="#C8402B" stroke="#1C1C1A" stroke-width="2"/>
       <rect x="3" y="34" width="9" height="20" fill="#5E5D55" stroke="#1C1C1A" stroke-width="2"/>
@@ -131,8 +135,11 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
         <circle id="pL" cx="36" cy="42" r="5" fill="#1C1C1A"/>
         <circle id="pR" cx="64" cy="42" r="5" fill="#1C1C1A"/>
       </g>
-      <g id="arm"><rect x="92" y="46" width="22" height="8" rx="4" fill="#5E5D55" stroke="#1C1C1A" stroke-width="2"/><circle cx="114" cy="50" r="5" fill="#F2B705" stroke="#1C1C1A" stroke-width="2"/></g>
       <path id="mouth" d="M40 68 Q50 70 60 68" fill="none" stroke="#1C1C1A" stroke-width="3" stroke-linecap="round"/>
+      </g>
+      <g id="armL"><rect x="-14" y="46" width="22" height="8" rx="4" fill="#5E5D55" stroke="#1C1C1A" stroke-width="2"/><circle cx="-14" cy="50" r="5" fill="#F2B705" stroke="#1C1C1A" stroke-width="2"/></g>
+      <g id="arm"><rect x="92" y="46" width="22" height="8" rx="4" fill="#5E5D55" stroke="#1C1C1A" stroke-width="2"/><circle cx="114" cy="50" r="5" fill="#F2B705" stroke="#1C1C1A" stroke-width="2"/></g>
+      <text id="qm" x="50" y="-4" text-anchor="middle" font-size="18" font-weight="700" fill="#C8402B" font-family="Barlow Condensed,sans-serif">?</text>
     </svg></button>
     <div>
       <h1>ROBOT TRANSPORTER</h1>
@@ -163,7 +170,7 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
       <button class="btn r" data-d="right" aria-label="Belok kanan">▶</button>
       <button class="btn d" data-d="down" aria-label="Mundur">▼</button>
     </div>
-    <p style="color:var(--soft);font-size:13px;margin:14px 0 0">Tahan tombol untuk bergerak, lepas untuk berhenti. Keyboard: panah atau WASD untuk gerak, F untuk STOP.</p>
+    <p style="color:var(--soft);font-size:13px;margin:14px 0 0">Tahan tombol untuk bergerak, lepas untuk berhenti. Keyboard: panah atau WASD untuk gerak, F untuk STOP, Q/E untuk kurangi/tambah kecepatan 10.</p>
   </section>
 
   <!-- CAPIT -->
@@ -515,7 +522,7 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
     c.toggle('moving', on);
     if (on) c.toggle('rev', d === 'down');
   }
-  bot.insertAdjacentHTML('beforeend', '<g id="acc"></g>');
+  $('head').insertAdjacentHTML('beforeend', '<g id="acc"></g>');
   const acc = $('acc'); let ai = 1;
   const S = ' stroke="#1C1C1A" stroke-width="3"';
   const accs = [
@@ -569,9 +576,9 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
   // ---- Peringatan belum tersambung ----
   let lastWarn = 0;
   function warn() {
-    const n = Date.now(); if (n - lastWarn < 1500) return; lastWarn = n;
+    const n = Date.now(); if (n - lastWarn < 1200) return; lastWarn = n;
     log('Belum tersambung. Klik Hubungkan dulu.');
-    say('Eh, belum tersambung nih!', 'surprise'); anim($('botBtn'), 'shake');
+    reactNo();
     const b = $('connBtn'); b.classList.remove('nudge'); void b.offsetWidth; b.classList.add('nudge');
     const ns = $('nosig'); ns.classList.remove('show'); void ns.offsetWidth; ns.classList.add('show');
   }
@@ -596,6 +603,67 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
   }
   addEventListener('blur', releaseAll);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
+
+  // ---- Reaksi maskot bertahap saat tombol ditekan sebelum waktunya ----
+  const rxs = [], rest = 'rotate(0deg) translateY(0px)';
+  const A = (el, kf, d) => { rxs.push(el.animate(kf, { duration: d, easing: 'ease-in-out' })); };
+  const pose = (r, l, t, o) => ({ transform: r, offset: o });
+  const reactions = [
+    () => { // celingukan
+      say('Hmm?', 'busy');
+      [pL, pR].forEach(p => A(p, [{ transform: 'translate(0px,0px)' }, { transform: 'translate(-4px,0px)', offset: .25 }, { transform: 'translate(4px,0px)', offset: .6 }, { transform: 'translate(0px,0px)' }], 1000));
+      A($('qm'), [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0px)', offset: .2 }, { opacity: 1, offset: .8 }, { opacity: 0 }], 1100);
+      A($('head'), [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-6deg)', offset: .3 }, { transform: 'rotate(6deg)', offset: .65 }, { transform: 'rotate(0deg)' }], 1000);
+    },
+    () => { // geleng-geleng
+      say('Nggak, nggak.', 'sad');
+      A($('head'), [0, -12, 12, -12, 12, 0].map(d => ({ transform: 'rotate(' + d + 'deg)' })), 1000);
+    },
+    () => { // angkat bahu
+      say('Entahlah, Bos.', 'busy');
+      A($('arm'), [{ transform: 'rotate(80deg)' }, { transform: 'rotate(15deg)', offset: .3 }, { transform: 'rotate(15deg)', offset: .7 }, { transform: 'rotate(80deg)' }], 1200);
+      A($('armL'), [{ transform: 'rotate(-80deg)' }, { transform: 'rotate(-15deg)', offset: .3 }, { transform: 'rotate(-15deg)', offset: .7 }, { transform: 'rotate(-80deg)' }], 1200);
+      A($('head'), [{ transform: 'translateY(0px)' }, { transform: 'translateY(5px)', offset: .3 }, { transform: 'translateY(5px)', offset: .7 }, { transform: 'translateY(0px)' }], 1200);
+    },
+    () => { // melipat tangan
+      say('Hmph.', 'sad');
+      const f = (a, b) => [{ transform: 'translateY(0px) rotate(' + a + 'deg) scaleX(1)' }, { transform: 'translateY(20px) rotate(' + b + 'deg) scaleX(2.6)', offset: .3 }, { transform: 'translateY(20px) rotate(' + b + 'deg) scaleX(2.6)', offset: .75 }, { transform: 'translateY(0px) rotate(' + a + 'deg) scaleX(1)' }];
+      A($('arm'), f(80, 180), 1400); A($('armL'), f(-80, -180), 1400);
+      A($('head'), [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-4deg)', offset: .3 }, { transform: 'rotate(-4deg)', offset: .75 }, { transform: 'rotate(0deg)' }], 1400);
+    },
+    () => { // tepuk jidat
+      say('Aduh...', 'sad');
+      A($('arm'), [{ transform: 'rotate(80deg)' }, { transform: 'rotate(-115deg)', offset: .25 }, { transform: 'rotate(-128deg)', offset: .32 }, { transform: 'rotate(-115deg)', offset: .4 }, { transform: 'rotate(-115deg)', offset: .75 }, { transform: 'rotate(80deg)' }], 1300);
+      A($('head'), [{ transform: rest }, { transform: 'rotate(7deg) translateY(5px)', offset: .3 }, { transform: 'rotate(7deg) translateY(5px)', offset: .75 }, { transform: rest }], 1300);
+      setTimeout(() => { const r = $('botBtn').getBoundingClientRect(); burst(r.left + r.width * 0.8, r.top + r.height * 0.3, 6); }, 330);
+    }
+  ];
+  let stage = 0, lastRx = 0;
+  function reactNo() {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { say('Belum bisa, Bos.', 'sad'); return; }
+    const n = Date.now();
+    if (n - lastRx > 4000) stage = 0;
+    lastRx = n;
+    rxs.forEach(a => a.cancel()); rxs.length = 0;
+    reactions[Math.min(stage++, reactions.length - 1)]();
+  }
+
+  // ---- Q / E: kecepatan -10 / +10 ----
+  function setSpeed(v) {
+    v = Math.max(0, Math.min(100, v));
+    if (v === speedVal) { say(v === 100 ? 'Sudah mentok, Bos!' : 'Sudah nol, Bos.', 'surprise'); return; }
+    speedVal = v;
+    $('speed').value = v; $('spVal').textContent = v + '%';
+    $('spVal').animate([{ transform: 'scale(1.5)' }, { transform: 'scale(1)' }], { duration: 220, easing: 'ease-out' });
+    log('Kecepatan ' + v + '%.'); send('speed:' + v);
+  }
+  addEventListener('keydown', e => {
+    if (document.activeElement === $('cmd') || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key.toLowerCase();
+    if (k !== 'e' && k !== 'q') return;
+    if (!connected) return warn();
+    setSpeed(speedVal + (k === 'e' ? 10 : -10));
+  });
 })();
 </script>
 </body>
