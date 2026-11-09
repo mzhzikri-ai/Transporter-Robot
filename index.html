@@ -10,8 +10,71 @@
 <style>
 :root{--bg:#CFCEC6;--panel:#E9E7DF;--ink:#1C1C1A;--soft:#5E5D55;--line:#1C1C1A;--yel:#F2B705;--red:#C8402B;--grn:#2F7D4F}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.4 'Barlow',system-ui,sans-serif;padding:20px}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.4 'Barlow',system-ui,sans-serif;padding:20px;background-image:linear-gradient(rgba(28,28,26,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(28,28,26,.05) 1px,transparent 1px);background-size:32px 32px}
 h1,h2{font-family:'Barlow Condensed','Arial Narrow',sans-serif;margin:0;letter-spacing:.02em}
+
+/* --- OVERLAY LOGIN --- */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-image: linear-gradient(rgba(28,28,26,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(28,28,26,.05) 1px,transparent 1px);
+  background-size: 32px 32px;
+  transition: opacity 0.4s ease, visibility 0.4s;
+}
+.login-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.login-card {
+  background: var(--panel);
+  border: 4px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--ink);
+  padding: 28px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+.login-bot-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.login-bot-area svg {
+  width: 100px;
+  height: auto;
+}
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+}
+.login-form label {
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.login-form input {
+  width: 100%;
+  border: 2px solid var(--ink);
+  padding: 10px;
+  font: inherit;
+  background: #fff;
+}
+.login-form input:focus {
+  outline: 3px solid var(--red);
+}
+
+/* --- DASHBOARD DASH UTAMA --- */
 .wrap{max-width:1100px;margin:auto}
 header{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;border-bottom:4px solid var(--ink);padding-bottom:12px;margin-bottom:18px}
 h1{font-size:34px;font-weight:700}
@@ -51,10 +114,10 @@ svg{display:block;width:100%;height:auto}
 .link{background:none;border:0;text-decoration:underline;color:var(--soft);margin-top:8px;padding:0}
 .note{margin-top:18px;border-left:6px solid var(--yel);background:var(--panel);padding:10px 14px;color:var(--soft)}
 .brand{display:flex;align-items:center;gap:14px}
-#bot{width:84px;height:auto;transition:transform .15s}
-#eyes{transform-box:fill-box;transform-origin:center;transition:transform .08s}
-#eyes.blink{transform:scaleY(.1)}
-.bubble{display:inline-block;margin-top:4px;padding:3px 10px;background:var(--yel);border:2px solid var(--ink);font-weight:600;font-size:13px}
+#bot, #loginBot{width:84px;height:auto;transition:transform .15s}
+#eyes, #loginEyes{transform-box:fill-box;transform-origin:center;transition:transform .08s}
+#eyes.blink, #loginEyes.blink{transform:scaleY(.1)}
+.bubble{display:inline-block;margin-top:4px;padding:3px 10px;background:var(--yel);border:2px solid var(--ink);font-weight:600;font-size:13px;min-height:1.7em}
 .botwrap{background:none;border:0;padding:0;cursor:pointer;line-height:0}
 .botwrap.hop{animation:hop .6s ease}
 @keyframes hop{0%{transform:none}25%{transform:translateY(4px) scale(1.1,.88)}55%{transform:translateY(-16px) scale(.94,1.08)}80%{transform:translateY(0) scale(1.06,.94)}100%{transform:none}}
@@ -73,24 +136,22 @@ body.moving .tower .y{opacity:1;animation:blink .5s steps(2) infinite}
 @keyframes blink{50%{opacity:.2}}
 .vis.hit{animation:hit .35s ease}
 @keyframes hit{0%,100%{transform:none;box-shadow:none}30%{transform:translateY(6px);box-shadow:0 0 0 5px var(--yel)}60%{transform:translateY(-3px)}}
-.spark{position:fixed;width:7px;height:7px;pointer-events:none;z-index:9}
+.spark{position:fixed;width:7px;height:7px;pointer-events:none;z-index:9999}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 .beacon{width:30px;height:30px;border-radius:50%;background:#6b6a62;border:2px solid var(--ink)}
 body.moving.rev .beacon{background:conic-gradient(#F2B705 0 25%,#8a6a00 0 50%,#F2B705 0 75%,#8a6a00 0);animation:spin .6s linear infinite}
-#eyes.sleep{transform:scaleY(.1)}
-.botwrap.nod{animation:nod .4s}
+#eyes.sleep, #loginEyes.sleep{transform:scaleY(.1)}
+.botwrap.nod, #loginBot.nod{animation:nod .4s}
 @keyframes nod{40%{transform:translateY(5px) rotate(4deg)}}
-.botwrap.shake{animation:shake .4s}
+.botwrap.shake, #loginBot.shake{animation:shake .4s}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 body.alarm .wrap{animation:shake .4s 2}
 body.alarm::after{content:'';position:fixed;inset:0;background:rgba(200,64,43,.35);pointer-events:none;animation:flash .7s ease-out forwards}
 @keyframes flash{to{opacity:0}}
-body{background-image:linear-gradient(rgba(28,28,26,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(28,28,26,.05) 1px,transparent 1px);background-size:32px 32px}
-.bubble{min-height:1.7em}
-#bot{overflow:visible}
-#arm{transform-origin:92px 50px;transform-box:view-box;transform:rotate(80deg)}
-#arm.wave{animation:wave 1.4s ease}
-#arm.salute{animation:salute 1.2s ease}
+#bot, #loginBot{overflow:visible}
+#arm, #loginArm{transform-origin:92px 50px;transform-box:view-box;transform:rotate(80deg)}
+#arm.wave, #loginArm.wave{animation:wave 1.4s ease}
+#arm.salute, #loginArm.salute{animation:salute 1.2s ease}
 @keyframes wave{0%,100%{transform:rotate(80deg)}20%,50%,80%{transform:rotate(-70deg)}35%,65%{transform:rotate(-40deg)}}
 @keyframes salute{0%,100%{transform:rotate(80deg)}25%,75%{transform:rotate(-115deg)}}
 .puff{position:absolute;width:26px;height:26px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,#bdbbb2 0,rgba(189,187,178,0) 70%)}
@@ -110,14 +171,55 @@ body.holding::before{content:'';position:fixed;inset:0;pointer-events:none;z-ind
 body:not(.conn) .tower .r{animation:blink 1s steps(2) infinite}
 body:not(.conn) :is(.dpad .btn,.two .btn,.sw,.send .btn,input[type=range]){opacity:.55}
 body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-shadow:3px 3px 0 var(--ink)}
-#head{transform-origin:50px 48px;transform-box:view-box}
-#armL{transform-origin:8px 50px;transform-box:view-box;transform:rotate(-80deg)}
+#head, #loginHead{transform-origin:50px 48px;transform-box:view-box}
+#armL, #loginArmL{transform-origin:8px 50px;transform-box:view-box;transform:rotate(-80deg)}
 #qm{opacity:0}
 :focus-visible{outline:3px solid var(--red);outline-offset:2px}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
+
+<!-- === OVERLAY LOGIN === -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-bot-area">
+      <svg id="loginBot" viewBox="0 0 100 90" aria-hidden="true">
+        <g id="loginHead">
+          <line x1="50" y1="14" x2="50" y2="5" stroke="#1C1C1A" stroke-width="3"/>
+          <circle cx="50" cy="5" r="4" fill="#C8402B" stroke="#1C1C1A" stroke-width="2"/>
+          <rect x="3" y="34" width="9" height="20" fill="#5E5D55" stroke="#1C1C1A" stroke-width="2"/>
+          <rect x="88" y="34" width="9" height="20" fill="#5E5D55" stroke="#1C1C1A" stroke-width="2"/>
+          <rect x="10" y="14" width="80" height="66" rx="14" fill="#F2B705" stroke="#1C1C1A" stroke-width="3"/>
+          <rect x="18" y="24" width="64" height="36" rx="8" fill="#1C1C1A"/>
+          <g id="loginEyes">
+            <circle cx="36" cy="42" r="11" fill="#fff"/>
+            <circle cx="64" cy="42" r="11" fill="#fff"/>
+            <circle cx="36" cy="42" r="5" fill="#1C1C1A"/>
+            <circle cx="64" cy="42" r="5" fill="#1C1C1A"/>
+          </g>
+          <path id="loginMouth" d="M40 68 Q50 70 60 68" fill="none" stroke="#1C1C1A" stroke-width="3" stroke-linecap="round"/>
+        </g>
+        <g id="loginArmL"><rect x="-14" y="46" width="22" height="8" rx="4" fill="#5E5D55" stroke="#1C1C1A" stroke-width="2"/><circle cx="-14" cy="50" r="5" fill="#F2B705" stroke="#1C1C1A" stroke-width="2"/></g>
+        <g id="loginArm"><rect x="92" y="46" width="22" height="8" rx="4" fill="#5E5D55" stroke="#1C1C1A" stroke-width="2"/><circle cx="114" cy="50" r="5" fill="#F2B705" stroke="#1C1C1A" stroke-width="2"/></g>
+      </svg>
+      <div class="bubble" id="loginBubble">Silahkan masukan passwordnya bos</div>
+    </div>
+    
+    <div class="login-form" id="loginForm">
+      <div>
+        <label for="userInput">Username</label>
+        <input type="text" id="userInput" placeholder="Masukkan username" autocomplete="off">
+      </div>
+      <div>
+        <label for="passInput">Password</label>
+        <input type="password" id="passInput" placeholder="Masukkan password">
+      </div>
+      <button type="button" id="loginBtn" class="btn" style="width:100%; margin-top:8px;">MASUK</button>
+    </div>
+  </div>
+</div>
+
+<!-- === MAIN DASHBOARD === -->
 <div class="wrap">
 <header>
   <div class="brand">
@@ -218,11 +320,74 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
 (function () {
   const $ = id => document.getElementById(id);
   const SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-  const TX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // notify (micro:bit -> web)
-  const RX = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // write  (web -> micro:bit)
+  const TX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+  const RX = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
   let device = null, rxChar = null, connected = false, motorOn = false;
   let queue = Promise.resolve();
 
+  // ---- LOGIK LOGIN & MASKOT LOGIN ----
+  const mouths = {
+    idle: 'M40 68 Q50 70 60 68', happy: 'M38 65 Q50 77 62 65', busy: 'M42 68 L58 68',
+    sad: 'M38 72 Q50 63 62 72', surprise: 'M45 65 Q50 77 55 65 Q50 61 45 65',
+    angry: 'M38 70 L44 66 L50 70 L56 66 L62 70', sleep: 'M46 68 Q50 73 54 68'
+  };
+
+  let typeTLogin;
+  function typeTextLogin(t) {
+    clearInterval(typeTLogin);
+    const b = $('loginBubble');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { b.textContent = t; return; }
+    let i = 1; b.textContent = t.slice(0, 1);
+    typeTLogin = setInterval(() => { b.textContent = t.slice(0, ++i); if (i >= t.length) clearInterval(typeTLogin); }, 28);
+  }
+
+  function sayLogin(text, mood) {
+    typeTextLogin(text);
+    $('loginMouth').setAttribute('d', mouths[mood] || mouths.idle);
+  }
+
+  // Animasi awal robot saat masuk halaman login
+  setTimeout(() => {
+    sayLogin('Silahkan masukan passwordnya bos', 'happy');
+    const arm = $('loginArm');
+    arm.classList.remove('wave'); void arm.offsetWidth; arm.classList.add('wave');
+  }, 300);
+
+  let isLoggingIn = false;
+  function handleLogin() {
+    if (isLoggingIn) return;
+    const u = $('userInput').value.trim();
+    const p = $('passInput').value.trim();
+    const botEl = $('loginBot');
+
+    if (u === 'admin' && p === '12345') {
+      isLoggingIn = true;
+      sayLogin('Siap Bos! Akses diterima, membuka sistem...', 'happy');
+      botEl.classList.remove('shake', 'nod'); void botEl.offsetWidth; botEl.classList.add('nod');
+      
+      setTimeout(() => {
+        $('loginOverlay').classList.add('hidden');
+        say('Halo Bos Admin! Hubungkan aku dulu ya.', 'happy');
+      }, 2000); // delay 2 detik
+    } else {
+      sayLogin('Password salah', 'sad');
+      botEl.classList.remove('shake', 'nod'); void botEl.offsetWidth; botEl.classList.add('shake');
+    }
+  }
+
+  $('loginBtn').onclick = handleLogin;
+  $('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+  $('userInput').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+
+  setInterval(() => {
+    const lEyes = $('loginEyes');
+    if (lEyes) {
+      lEyes.classList.add('blink');
+      setTimeout(() => lEyes.classList.remove('blink'), 140);
+    }
+  }, 3600);
+
+  // ---- APP DASHBOARD ----
   function log(msg) {
     const e = $('empty'); if (e) e.remove();
     const d = document.createElement('div');
@@ -329,7 +494,7 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
   $('speed').onchange = e => {
     if (!connected) return; log('Kecepatan ' + e.target.value + '%.'); send('speed:' + e.target.value); };
 
-  // ---- D-pad: tahan = UP/DOWN/LEFT/RIGHT, lepas = STOP (semua huruf besar) ----
+  // ---- D-pad ----
   const names = { up: 'Maju', down: 'Mundur', left: 'Belok kiri', right: 'Belok kanan', stop: 'Berhenti' };
   document.querySelectorAll('[data-d]').forEach(b => {
     const d = b.dataset.d; let held = false;
@@ -395,6 +560,7 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
   const keyMap = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right', f: 'stop' };
   const kd = e => keyMap[e.key] || keyMap[e.key.toLowerCase()];
   addEventListener('keydown', e => {
+    if ($('loginOverlay') && !$('loginOverlay').classList.contains('hidden')) return;
     if (document.activeElement === $('cmd')) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (kd(e)) {
@@ -409,13 +575,8 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
     if (kd(e)) document.querySelector('[data-d="' + kd(e) + '"]')._release();
   });
 
-  // ---- Maskot: mata mengikuti kursor, kedip, ekspresi ----
+  // ---- Maskot ----
   const bot = $('bot'), pL = $('pL'), pR = $('pR'), eyes = $('eyes'), mouth = $('mouth');
-  const mouths = {
-    idle: 'M40 68 Q50 70 60 68', happy: 'M38 65 Q50 77 62 65', busy: 'M42 68 L58 68',
-    sad: 'M38 72 Q50 63 62 72', surprise: 'M45 65 Q50 77 55 65 Q50 61 45 65',
-    angry: 'M38 70 L44 66 L50 70 L56 66 L62 70', sleep: 'M46 68 Q50 73 54 68'
-  };
   let moodT, typeT;
   function typeText(t) {
     clearInterval(typeT);
@@ -435,7 +596,8 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
   }
   addEventListener('pointermove', e => {
     [['eL', pL], ['eR', pR]].forEach(([id, p]) => {
-      const r = $(id).getBoundingClientRect();
+      const el = $(id); if (!el) return;
+      const r = el.getBoundingClientRect();
       const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
       const k = Math.min(1, Math.hypot(dx, dy) / 160) * 4.5, a = Math.atan2(dy, dx);
       p.setAttribute('transform', 'translate(' + (Math.cos(a) * k).toFixed(2) + ' ' + (Math.sin(a) * k).toFixed(2) + ')');
@@ -449,7 +611,7 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
   });
   setInterval(() => { eyes.classList.add('blink'); setTimeout(() => eyes.classList.remove('blink'), 140); }, 3600);
 
-  // ---- Efek pabrik ----
+  // ---- Efek & Animasi Tambahan ----
   function clampFx() {
     const c = document.body.classList;
     c.remove('clamp'); void document.body.offsetWidth; c.add('clamp');
@@ -500,7 +662,6 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
     say(lines[li % lines.length], 'happy'); li++;
   };
 
-  // ---- Gerak, ekspresi, aksesori ----
   const stops = [];
   function anim(el, c) { el.classList.remove('hop', 'nod', 'shake'); void el.offsetWidth; el.classList.add(c); }
   function setMove(d, on) {
@@ -532,7 +693,6 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
     '<path d="M16 20 Q50 -4 84 20 Z" fill="#C8402B"' + S + '/><rect x="52" y="17" width="44" height="6" rx="3" fill="#C8402B"' + S + '/>'
   ];
 
-  // ---- Tidur kalau lama didiamkan ----
   let sleeping = false, last = Date.now();
   const wake = () => {
     last = Date.now();
@@ -543,7 +703,6 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
     if (!sleeping && Date.now() - last > 30000) { sleeping = true; eyes.classList.add('sleep'); say('Zzz...', 'sleep'); }
   }, 1000);
 
-  // ---- Gamepad: stik kiri = arah, A = capit, B = lepas, X = stop, D-pad = arah ----
   let prev = [];
   const pad = { 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
   let stick = null;
@@ -572,8 +731,6 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
   addEventListener('gamepadconnected', e => { log('Gamepad terhubung: ' + e.gamepad.id); say('Wah, ada stik!', 'happy'); requestAnimationFrame(poll); });
   addEventListener('gamepaddisconnected', () => log('Gamepad terputus.'));
 
-
-  // ---- Peringatan belum tersambung ----
   let lastWarn = 0;
   function warn() {
     const n = Date.now(); if (n - lastWarn < 1200) return; lastWarn = n;
@@ -583,7 +740,6 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
     const ns = $('nosig'); ns.classList.remove('show'); void ns.offsetWidth; ns.classList.add('show');
   }
 
-  // ---- Kotak barang naik saat dicapit, jatuh memantul saat dilepas ----
   function moveCargo(held) {
     cargo.getAnimations().forEach(a => a.cancel());
     cargo.style.transform = held ? 'translateY(-48px)' : 'translateY(0)';
@@ -594,7 +750,6 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
       { duration: held ? 350 : 700, easing: 'ease-out' });
   }
 
-  // ---- Jendela tidak aktif: robot berhenti ----
   function releaseAll() {
     const mv = document.body.classList.contains('moving');
     document.querySelectorAll('[data-d]').forEach(b => b._release());
@@ -604,34 +759,32 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
   addEventListener('blur', releaseAll);
   document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
 
-  // ---- Reaksi maskot bertahap saat tombol ditekan sebelum waktunya ----
   const rxs = [], rest = 'rotate(0deg) translateY(0px)';
   const A = (el, kf, d) => { rxs.push(el.animate(kf, { duration: d, easing: 'ease-in-out' })); };
-  const pose = (r, l, t, o) => ({ transform: r, offset: o });
   const reactions = [
-    () => { // celingukan
+    () => {
       say('Hmm?', 'busy');
       [pL, pR].forEach(p => A(p, [{ transform: 'translate(0px,0px)' }, { transform: 'translate(-4px,0px)', offset: .25 }, { transform: 'translate(4px,0px)', offset: .6 }, { transform: 'translate(0px,0px)' }], 1000));
       A($('qm'), [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0px)', offset: .2 }, { opacity: 1, offset: .8 }, { opacity: 0 }], 1100);
       A($('head'), [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-6deg)', offset: .3 }, { transform: 'rotate(6deg)', offset: .65 }, { transform: 'rotate(0deg)' }], 1000);
     },
-    () => { // geleng-geleng
+    () => {
       say('Nggak, nggak.', 'sad');
       A($('head'), [0, -12, 12, -12, 12, 0].map(d => ({ transform: 'rotate(' + d + 'deg)' })), 1000);
     },
-    () => { // angkat bahu
+    () => {
       say('Entahlah, Bos.', 'busy');
       A($('arm'), [{ transform: 'rotate(80deg)' }, { transform: 'rotate(15deg)', offset: .3 }, { transform: 'rotate(15deg)', offset: .7 }, { transform: 'rotate(80deg)' }], 1200);
       A($('armL'), [{ transform: 'rotate(-80deg)' }, { transform: 'rotate(-15deg)', offset: .3 }, { transform: 'rotate(-15deg)', offset: .7 }, { transform: 'rotate(-80deg)' }], 1200);
       A($('head'), [{ transform: 'translateY(0px)' }, { transform: 'translateY(5px)', offset: .3 }, { transform: 'translateY(5px)', offset: .7 }, { transform: 'translateY(0px)' }], 1200);
     },
-    () => { // melipat tangan
+    () => {
       say('Hmph.', 'sad');
       const f = (a, b) => [{ transform: 'translateY(0px) rotate(' + a + 'deg) scaleX(1)' }, { transform: 'translateY(20px) rotate(' + b + 'deg) scaleX(2.6)', offset: .3 }, { transform: 'translateY(20px) rotate(' + b + 'deg) scaleX(2.6)', offset: .75 }, { transform: 'translateY(0px) rotate(' + a + 'deg) scaleX(1)' }];
       A($('arm'), f(80, 180), 1400); A($('armL'), f(-80, -180), 1400);
       A($('head'), [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-4deg)', offset: .3 }, { transform: 'rotate(-4deg)', offset: .75 }, { transform: 'rotate(0deg)' }], 1400);
     },
-    () => { // tepuk jidat
+    () => {
       say('Aduh...', 'sad');
       A($('arm'), [{ transform: 'rotate(80deg)' }, { transform: 'rotate(-115deg)', offset: .25 }, { transform: 'rotate(-128deg)', offset: .32 }, { transform: 'rotate(-115deg)', offset: .4 }, { transform: 'rotate(-115deg)', offset: .75 }, { transform: 'rotate(80deg)' }], 1300);
       A($('head'), [{ transform: rest }, { transform: 'rotate(7deg) translateY(5px)', offset: .3 }, { transform: 'rotate(7deg) translateY(5px)', offset: .75 }, { transform: rest }], 1300);
@@ -648,7 +801,6 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
     reactions[Math.min(stage++, reactions.length - 1)]();
   }
 
-  // ---- Q / E: kecepatan -10 / +10 ----
   function setSpeed(v) {
     v = Math.max(0, Math.min(100, v));
     if (v === speedVal) { say(v === 100 ? 'Sudah mentok, Bos!' : 'Sudah nol, Bos.', 'surprise'); return; }
@@ -658,6 +810,7 @@ body:not(.conn) :is(.dpad .btn,.two .btn,.send .btn):active{transform:none;box-s
     log('Kecepatan ' + v + '%.'); send('speed:' + v);
   }
   addEventListener('keydown', e => {
+    if ($('loginOverlay') && !$('loginOverlay').classList.contains('hidden')) return;
     if (document.activeElement === $('cmd') || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
     const k = e.key.toLowerCase();
     if (k !== 'e' && k !== 'q') return;
